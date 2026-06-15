@@ -1,0 +1,94 @@
+name: "cygno_flow_matching"
+
+flow_model:
+
+  init_weights:
+    all_linear: xavier_uniform   # xavier_uniform | null
+    time_step_embedder: normal   # normal | null
+    ln_modulation: zero          # zero | null  (DiT adaLN layers)
+    v_t_pred_linear: zero        # zero | null  (final velocity head)
+
+  final_modulation: true
+
+  sigma_min: 1.0e-5
+  n_steps: 10
+
+  time_embedding_size: 64
+  h_dim: 256
+
+  # 2-D pixel coordinate encoder (replaces atlas eta/phi/layer)
+  # output_size must equal etaphi_emb.output + layer_emb.output from atlas (32+32=64)
+  # so that cond_emb_dim = 64 + 31 + 1 = 96 is unchanged downstream.
+  pos_emb:
+    input_size: 2
+    output_size: 64
+    hidden_layers: [64]
+    activation: "LeakyReLU"
+    final_activation: "LeakyReLU"
+    norm_layer: "LayerNorm"
+    norm_final_layer: false
+    dropout: 0.0
+
+  # Source (conditioning) pixel value encoder — identical to atlas e_proxy_emb
+  source_emb:
+    input_size: 1
+    output_size: 31
+    hidden_layers: [64]
+    activation: "LeakyReLU"
+    final_activation: "LeakyReLU"
+    norm_layer: "LayerNorm"
+    norm_final_layer: false
+    dropout: 0.0
+
+  # Noisy target encoder — unchanged from atlas
+  noisy_input_emb:
+    input_size: 1
+    output_size: 64
+    hidden_layers: [64]
+    activation: "LeakyReLU"
+    final_activation: "LeakyReLU"
+    norm_layer: "LayerNorm"
+    norm_final_layer: false
+    dropout: 0.0
+
+  # Input projection to h_dim; input_size=-1 → auto-computed as
+  # pos_emb.output(64) + source_emb.output(31) + noisy_input_emb.output(64) + 1 = 160
+  feat_0_mlp:
+    input_size: -1
+    output_size: 256
+    hidden_layers: []
+    activation: "LeakyReLU"
+    final_activation: "LeakyReLU"
+    norm_layer: "LayerNorm"
+    norm_final_layer: false
+    dropout: 0.0
+
+  transformer:
+    type: 'DiT'                  # 'DiT' | 'GPT-2+Normformer'
+    num_heads: 4
+    num_transformer_layers: 6
+    dense_config:
+      hidden_layers: [256]
+      activation: "LeakyReLU"
+      final_activation: "LeakyReLU"
+      norm_layer: "LayerNorm"
+      norm_final_layer: false
+      dropout: 0.0
+
+  v_t_pred:
+    input_size: 352              # h_dim(256) + cond_emb_dim(96) — auto-overridden
+    output_size: 1
+    hidden_layers: [128, 64, 32]
+    activation: "LeakyReLU"
+    final_activation: null
+    norm_layer: "LayerNorm"
+    norm_final_layer: "LayerNorm"
+    dropout: 0.0
+
+
+# Pixel value transformation: log1p + standardisation
+# Stats computed from small_dataset.h5 after crop+resize to 64x64
+# Re-compute on your full training set: mean(log1p(pixels)), std(log1p(pixels))
+pixel_transform:
+  mean: 0.5914
+  std:  1.2280

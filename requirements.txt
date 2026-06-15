@@ -1,0 +1,58 @@
+# ============================================================
+# ATLAS Super-Resolution — Python Dependencies
+# Python 3.9 (set via: lsetup "python 3.9.21-x86_64-el9")
+#
+# RECOMMENDED: mamba (handles CUDA bindings for PyTorch/DGL)
+#
+#   Create environment:
+#     mamba create -n atlas-sr python=3.9
+#     mamba activate atlas-sr
+#
+#   Install GPU packages via conda-forge/pytorch channels first:
+#     mamba install pytorch torchvision pytorch-cuda=12.1 -c pytorch -c nvidia
+#     mamba install dgl -c dglteam/label/cu121
+#
+#   Then install remaining packages:
+#     pip install -r requirements.txt
+#
+# ALTERNATIVE: venv + pip (CPU-only or if CUDA already available)
+#   python -m venv .venv && source .venv/bin/activate
+#   pip install -r requirements.txt
+# ============================================================
+
+# --- Deep learning framework ---
+# torch and dgl installed via mamba above (GPU build)
+# if using venv/CPU-only, uncomment:
+# torch>=2.0.0
+lightning>=2.0.0
+pytorch-lightning>=2.0.0
+torchcfm>=0.1.0
+torchdiffeq>=0.2.3
+
+# --- Numerical / scientific computing ---
+numpy>=1.24.0
+scipy>=1.10.0
+
+# --- Data I/O (HEP/ROOT files) ---
+uproot>=5.0.0
+awkward>=2.0.0
+h5py>=3.9.0
+
+# --- Graph neural networks ---
+# dgl installed via mamba above (GPU build)
+# if using venv/CPU-only, uncomment:
+# dgl>=1.1.0
+
+# --- Visualisation ---
+matplotlib>=3.7.0
+seaborn>=0.12.0
+
+# --- Experiment tracking ---
+comet-ml>=3.33.0
+
+# --- Distributed computing ---
+ray>=2.5.0
+
+# --- Utilities ---
+tqdm>=4.65.0
+PyYAML>=6.0

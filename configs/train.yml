@@ -1,0 +1,36 @@
+## Data paths — update to point to your actual HDF5 files
+train_path: data/small_dataset.h5
+val_path:   data/small_dataset.h5
+
+## HDF5 dataset keys
+# When you have separate source/target files, change these:
+source_key: images
+target_key: images
+
+## Image preprocessing
+crop_size: 64    # pixels per side after crop+resize
+margin: 16       # extra pixels around the active bounding box
+
+## Dataset size limits (-1 = use all)
+limit_train: -1
+limit_val:   50
+
+## Training
+num_epochs: 50
+batch_size_train: 8
+batch_size_val:   8
+num_workers: 2
+learning_rate: 1.0e-3
+
+lr_scheduler:
+  warm_start_epochs: 0.05      # fraction of num_epochs
+  cosine_epochs: 0.80          # fraction of num_epochs
+  eta_min: 1.0e-5
+  last_epoch: -1
+  max_epochs: take_as_num_epochs
+
+## Validation / output
+eval_every_n_epoch: 1
+n_image_displays: 3            # images saved per validation epoch
+plot_dir: outputs/plots
+output_dir: outputs
